@@ -28,11 +28,13 @@ tidy_des <- evdes %>%
   filter(str_detect(word, "[a-z]"))
 head(tidy_des)
 
+#clean the stopwords
 tidy_des <- tidy_des %>%
     filter(!word %in% stop_words$word)
 tidy_des %>%
   count(word, sort = TRUE)
 
+#clean HTML words
 remove_reg <- c("&amp;","&lt;","&gt;","<p>", "</p>","&rsquo", "&lsquo;",  "&#39;", "<strong>", "</strong>", "rsquo", "em", "ndash", "nbsp", "lsquo", "strong")
                   
 tidy_des <- tidy_des %>%
@@ -40,15 +42,17 @@ tidy_des <- tidy_des %>%
 tidy_des %>%
   count(word, sort = TRUE)
 
+#filter only the genre of Children
 tidy_des <- tidy_des %>%
   filter(genre == "Children") 
 
-
+#group the data by year
 edbf_term_counts <- tidy_des %>% 
   group_by(year) %>%
   count(word, sort = TRUE)
 head(edbf_term_counts)
 
+#state woman words
 edbf_term_counts$womword <- as.integer(grepl("women|feminist|feminism|gender|harassment|sexism|sexist", 
                                             x = edbf_term_counts$word))
 head(edbf_term_counts)
@@ -62,6 +66,7 @@ edbf_counts <- edbf_term_counts %>%
             year_total= min(year_total))
 head(edbf_counts)
 
+#draw the graph
 ggplot(edbf_counts, aes(year, sum_wom / year_total, group=1)) +
   geom_line() +
   geom_vline(xintercept = 2017, col="red") +
@@ -79,6 +84,7 @@ ggplot(edbf_counts, aes(year, sum_wom / year_total, group=1)) +
 2. Choose another set of terms by which to filter (e.g., race-related words) and plot their frequency over time.
 
 ```{r}
+#input the data
 ed <- read_csv("https://raw.githubusercontent.com/cjbarrie/RDL-Ed/main/02-text-as-data/data/edbookfestall.csv")
 colnames(ed)
 glimpse(ed)
@@ -96,11 +102,13 @@ tdes <- egdes %>%
   filter(str_detect(word, "[a-z]"))
 head(tdes)
 
+#clean stopwords
 tdes <- tdes %>%
     filter(!word %in% stop_words$word)
 tdes %>%
   count(word, sort = TRUE)
 
+#clean HTML words
 remove_reg <- c("&amp;","&lt;","&gt;","<p>", "</p>","&rsquo", "&lsquo;",  "&#39;", "<strong>", "</strong>", "rsquo", "em", "ndash", "nbsp", "lsquo", "strong")
                   
 tdes <- tdes %>%
@@ -108,17 +116,18 @@ tdes <- tdes %>%
 tdes %>%
   count(word, sort = TRUE)
 
+#filter only the genre of literature
 tdes <- tdes %>%
   filter(genre == "Literature") 
 head(tdes)
 
-
-
+#have a look at the new dataset
 edtc <- tdes %>% 
   group_by(year) %>%
   count(word, sort = TRUE)
 head(edtc)
 
+#define the war words
 edtc$warword <- as.integer(grepl("war|conflict|battle|soldier|army|weapon|violence|attack|defense|casualty|bomb|combat|peace|refugee|strategy", x = edtc$word))
 head(edtc)
 
@@ -131,6 +140,7 @@ edbfc <- edtc %>%
             year_total= min(year_total))
 head(edbfc)
 
+#draw the graph
 ggplot(edbfc, aes(year, sum_war / year_total, group=1)) +
   geom_line() +
   geom_vline(xintercept = 2012, col="red") +
