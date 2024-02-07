@@ -9,7 +9,9 @@ output: html_document
 1. Filter the books by genre (selecting e.g., "Literature" or "Children") and plot frequency of women-related words over time.
 
 ```{r}
-edfl <- read_csv("data/wordfreq/edbookfestall.csv")
+getwd()
+#input the data
+edfl <- read_csv("https://raw.githubusercontent.com/cjbarrie/RDL-Ed/main/02-text-as-data/data/edbookfestall.csv")
 colnames(edfl)
 glimpse(edfl)
 
@@ -77,9 +79,7 @@ ggplot(edbf_counts, aes(year, sum_wom / year_total, group=1)) +
 2. Choose another set of terms by which to filter (e.g., race-related words) and plot their frequency over time.
 
 ```{r}
-setwd("/Users/a1397135541/Documents/GitHub/CTA-ED-exercise1/data/wordfreq")
-getwd()
-ed <- read_csv("data/wordfreq/edbookfestall.csv")
+ed <- read_csv("https://raw.githubusercontent.com/cjbarrie/RDL-Ed/main/02-text-as-data/data/edbookfestall.csv")
 colnames(ed)
 glimpse(ed)
 
@@ -111,6 +111,7 @@ tdes %>%
 tdes <- tdes %>%
   filter(genre == "Literature") 
 head(tdes)
+
 
 
 edtc <- tdes %>% 
