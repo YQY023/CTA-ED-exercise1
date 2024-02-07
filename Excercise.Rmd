@@ -1,0 +1,152 @@
+---
+title: "CTA_excercise1"
+author: "Yan Qingyang"
+date: "2024-02-07"
+output: html_document
+---
+## Exercises
+
+1. Filter the books by genre (selecting e.g., "Literature" or "Children") and plot frequency of women-related words over time.
+
+```{r}
+edfl <- read_csv("data/wordfreq/edbookfestall.csv")
+colnames(edfl)
+glimpse(edfl)
+
+# get simplified dataset with genre, event contents and year
+evdes <- edfl %>%
+  select(description, year, genre)
+
+head(evdes)
+
+#get genre, year and word for every word and date pair in the dataset
+tidy_des <- evdes %>% 
+  mutate(desc = tolower(description)) %>%
+  unnest_tokens(word, desc) %>%
+  filter(str_detect(word, "[a-z]"))
+head(tidy_des)
+
+tidy_des <- tidy_des %>%
+    filter(!word %in% stop_words$word)
+tidy_des %>%
+  count(word, sort = TRUE)
+
+remove_reg <- c("&amp;","&lt;","&gt;","<p>", "</p>","&rsquo", "&lsquo;",  "&#39;", "<strong>", "</strong>", "rsquo", "em", "ndash", "nbsp", "lsquo", "strong")
+                  
+tidy_des <- tidy_des %>%
+  filter(!word %in% remove_reg)
+tidy_des %>%
+  count(word, sort = TRUE)
+
+tidy_des <- tidy_des %>%
+  filter(genre == "Children") 
+
+
+edbf_term_counts <- tidy_des %>% 
+  group_by(year) %>%
+  count(word, sort = TRUE)
+head(edbf_term_counts)
+
+edbf_term_counts$womword <- as.integer(grepl("women|feminist|feminism|gender|harassment|sexism|sexist", 
+                                            x = edbf_term_counts$word))
+head(edbf_term_counts)
+
+#get counts by year and word
+edbf_counts <- edbf_term_counts %>%
+  group_by(year) %>%
+  mutate(year_total = sum(n)) %>%
+  filter(womword==1) %>%
+  summarise(sum_wom = sum(n),
+            year_total= min(year_total))
+head(edbf_counts)
+
+ggplot(edbf_counts, aes(year, sum_wom / year_total, group=1)) +
+  geom_line() +
+  geom_vline(xintercept = 2017, col="red") +
+  geom_text(aes(x=2017.1, label="#metoo year", y=.00045), 
+            colour="black", angle=90, text=element_text(size=8)) +
+  xlab("Year") +
+  ylab("% gender-related words") +
+  scale_y_continuous(labels = scales::percent_format(),
+                     expand = c(0, 0), limits = c(0, NA)) +
+  theme_tufte(base_family = "Helvetica")
+```
+
+
+
+2. Choose another set of terms by which to filter (e.g., race-related words) and plot their frequency over time.
+
+```{r}
+setwd("/Users/a1397135541/Documents/GitHub/CTA-ED-exercise1/data/wordfreq")
+getwd()
+ed <- read_csv("data/wordfreq/edbookfestall.csv")
+colnames(ed)
+glimpse(ed)
+
+# get simplified dataset with genre, event contents and year
+egdes <- ed %>%
+  select(description, year, genre)
+
+head(egdes)
+
+#get genre, year and word for every word and date pair in the dataset
+tdes <- egdes %>% 
+  mutate(desc = tolower(description)) %>%
+  unnest_tokens(word, desc) %>%
+  filter(str_detect(word, "[a-z]"))
+head(tdes)
+
+tdes <- tdes %>%
+    filter(!word %in% stop_words$word)
+tdes %>%
+  count(word, sort = TRUE)
+
+remove_reg <- c("&amp;","&lt;","&gt;","<p>", "</p>","&rsquo", "&lsquo;",  "&#39;", "<strong>", "</strong>", "rsquo", "em", "ndash", "nbsp", "lsquo", "strong")
+                  
+tdes <- tdes %>%
+  filter(!word %in% remove_reg)
+tdes %>%
+  count(word, sort = TRUE)
+
+tdes <- tdes %>%
+  filter(genre == "Literature") 
+head(tdes)
+
+
+edtc <- tdes %>% 
+  group_by(year) %>%
+  count(word, sort = TRUE)
+head(edtc)
+
+edtc$warword <- as.integer(grepl("war|conflict|battle|soldier|army|weapon|violence|attack|defense|casualty|bomb|combat|peace|refugee|strategy", x = edtc$word))
+head(edtc)
+
+#get counts by year and word
+edbfc <- edtc %>%
+  group_by(year) %>%
+  mutate(year_total = sum(n)) %>%
+  filter(warword==1) %>%
+  summarise(sum_war = sum(n),
+            year_total= min(year_total))
+head(edbfc)
+
+ggplot(edbfc, aes(year, sum_war / year_total, group=1)) +
+  geom_line() +
+  geom_vline(xintercept = 2012, col="red") +
+  geom_text(aes(x=2012.1, label="#the Syrian Civil War", y=.0045), 
+            colour="black", angle=90, text=element_text(size=8)) +
+  geom_vline(xintercept = 2014, col="yellow") +
+  geom_text(aes(x=2014.1, label="#Ukraine crisis", y=.0045), 
+            colour="black", angle=90, text=element_text(size=8)) +
+  geom_vline(xintercept = 2015, col="orange") +
+  geom_text(aes(x=2015.1, label="#Paris terrorist attacks", y=.0045), 
+            colour="black", angle=90, text=element_text(size=8)) +
+  geom_vline(xintercept = 2017, col="purple") +
+  geom_text(aes(x=2017.1, label="#North Korea nuclear tests", y=.0045), 
+            colour="black", angle=90, text=element_text(size=8)) +
+  xlab("Year") +
+  ylab("% war-related words") +
+  scale_y_continuous(labels = scales::percent_format(),
+                     expand = c(0, 0), limits = c(0, NA)) +
+  theme_tufte(base_family = "Helvetica")
+```
